@@ -57,7 +57,7 @@ def genetic_algorithm(population_size, generations, fitness_function, crossover_
         random_number = random.random()
         
         while len(next_generation)<population_size:
-            parents = select_parents(population, fitness_values, number_of_parents)
+            parents = roulet_select_parents(population, fitness_values, number_of_parents)
             if random_number < crossover_probability:
                 offsprings = crossover_function(parents, number_of_offsprings)
             else:
@@ -95,7 +95,8 @@ def genetic_algorithm(population_size, generations, fitness_function, crossover_
         # print ("generation: ", generation )
         # print ("best individual: ", best_individual)
         avarage_fitness=sum(fitness_values)/len(fitness_values)
-        print ("generation: ", generation, "best fitness: ", best_fitness, "avarage fitness: ", avarage_fitness)
+        
+        print ("generation: ", generation, "best fitness: ", round(best_fitness,6), "avarage fitness: ", round(avarage_fitness, 6), "best_cost: ", best_cost)
         # print ("avarage fitness: ", avarage_fitness)
         # print ("best_cost: ", best_cost)
         if math.isclose(avarage_fitness, best_fitness, rel_tol=1e-6):
@@ -106,10 +107,36 @@ def genetic_algorithm(population_size, generations, fitness_function, crossover_
     return best_individual, best_fitness
 
 
-def select_parents(population, fitness_values, number_of_parents):
+def tournament_select_parents(population, fitness_values, number_of_parents):
     parents = []
     for _ in range(number_of_parents):
         tournament = random.sample(population, k=5)  # Select a random subset of 5 individuals
         max_fitness = max(fitness_values[i] for i in range(len(tournament)))
         parents.append(tournament[fitness_values.index(max_fitness)])
     return parents
+
+def roulet_select_parents(population, fitness_values, number_of_parents):
+    # Calculate the total fitness
+    total_fitness = sum(fitness_values)
+    
+    # Calculate the relative fitness (probability) of each individual
+    relative_fitness = [f / total_fitness for f in fitness_values]
+    
+    # Cumulative probability distribution
+    cumulative_probabilities = []
+    cumulative_sum = 0
+    for rf in relative_fitness:
+        cumulative_sum += rf
+        cumulative_probabilities.append(cumulative_sum)
+    
+    # Select parents
+    parents = []
+    for _ in range(number_of_parents):
+        r = random.random()
+        for i, individual in enumerate(population):
+            if r <= cumulative_probabilities[i]:
+                parents.append(individual)
+                break
+    
+    return parents
+

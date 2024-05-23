@@ -18,13 +18,14 @@ def fitness_function(chromosome):
     return fitness_value, costs
 
 def costOfSoftConstraints(chromosome):
-    weights=[0.6, 0.3]
+    weights=[0.3, 0.6, 0.5]
     free_day_cost = checkForFreeDay(chromosome) * weights[0]
     teacher_load_cost = checkTeacherLoad(chromosome) * weights[1]
-    # constraint3_cost = constraints.checkConstraint3(chromosome) * weights[2]
+    room_size_cost = checkRoomSpace(chromosome) * weights[2]
     # constraint4_cost = constraints.checkConstraint4(chromosome) * weights[3]
-    cost = [free_day_cost, teacher_load_cost]
-    return cost 
+    cost = [free_day_cost, teacher_load_cost, room_size_cost]
+    rounded_cost = [round(c, 2) for c in cost]
+    return rounded_cost 
 def checkForFreeDay(chromosome):
     cost=0
     for student_group in student_group_list:
@@ -42,22 +43,28 @@ def checkForFreeDay(chromosome):
 def checkTeacherLoad(chromsome):
     cost = 0
     teacher_loads = {}
-    # print ("_______________________")
     for gene in chromsome:
         if gene.get_teacher() not in teacher_loads:
             teacher_loads[gene.get_teacher()] = 0
         teacher_loads[gene.get_teacher()] += 1
-    # print(teacher_loads)
     for teacher, count in teacher_loads.items():
         
         if count > 10:
-            # print(f"Teacher {teacher} has been assigned to more than 10 events.")
             cost = cost + 1
         if count < 5:
-            # print(f"Teacher {teacher} has been assigned to less than 5 events.")
             cost = cost + 1
-    # print ("_______________________")
-    # print ("cost of teacher load:", cost)
-    # print(cost)
     return cost
-    
+def checkRoomSpace(chromosome):
+    cost = 0
+    for gene in chromosome:
+        students_in_event = 0
+        for student_group in gene.event.get_student_groups():
+            students_in_event += student_group.get_size()
+        
+        maximum_room_capacity = gene.get_classroom().get_size()
+        if students_in_event > maximum_room_capacity:
+            cost += 1
+        elif students_in_event > 0.9 * maximum_room_capacity:
+            over_capacity_percentage = (students_in_event - 0.9 * maximum_room_capacity) / (0.1 * maximum_room_capacity)
+            cost += over_capacity_percentage
+    return cost

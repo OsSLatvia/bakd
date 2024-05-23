@@ -30,7 +30,7 @@ student_groups = global_data.student_groups
 # # PyGAD configuration
 # initial_population_size = 10
 num_genes= len(all_events)
-population_size = 500
+population_size = 100
 generations = 10000
 
 best_individual, best_fitness = genetic_algorithm(population_size, generations, fitness_function, crossover_function, mutation_function, create_initial_population)
