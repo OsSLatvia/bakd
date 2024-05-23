@@ -9,3 +9,7 @@ number_of_timeslots = days * timeslots_in_day
 for i in range(number_of_timeslots):
     all_timeslots.append(Timeslot(i, timeslots_in_day))
 number_of_events=len(all_events)
+crossover_probability=0.5
+mutation_probability=0.01
+number_of_offsprings=2
+number_of_parents=2

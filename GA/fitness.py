@@ -11,18 +11,20 @@ def fitness_function(chromosome):
     # # Define your fitness calculation logic here
     # score = sum([1 for gene in solution if is_valid(gene)])
     # return score
-    cost = costOfSoftConstraints(chromosome)
-    fitness_value=1/(1+cost)
+    costs = costOfSoftConstraints(chromosome)
+    cost_sum = sum(costs)
+    fitness_value=1/(1+cost_sum)
 
-    return fitness_value, cost
+    return fitness_value, costs
 
 def costOfSoftConstraints(chromosome):
-    weights=[0.2, 0.6]
+    weights=[0.6, 0.3]
     free_day_cost = checkForFreeDay(chromosome) * weights[0]
     teacher_load_cost = checkTeacherLoad(chromosome) * weights[1]
     # constraint3_cost = constraints.checkConstraint3(chromosome) * weights[2]
     # constraint4_cost = constraints.checkConstraint4(chromosome) * weights[3]
-    return free_day_cost + teacher_load_cost #+ constraint2_cost + constraint3_cost + constraint4_cost
+    cost = [free_day_cost, teacher_load_cost]
+    return cost 
 def checkForFreeDay(chromosome):
     cost=0
     for student_group in student_group_list:
@@ -39,4 +41,23 @@ def checkForFreeDay(chromosome):
     return cost
 def checkTeacherLoad(chromsome):
     cost = 0
+    teacher_loads = {}
+    # print ("_______________________")
+    for gene in chromsome:
+        if gene.get_teacher() not in teacher_loads:
+            teacher_loads[gene.get_teacher()] = 0
+        teacher_loads[gene.get_teacher()] += 1
+    # print(teacher_loads)
+    for teacher, count in teacher_loads.items():
+        
+        if count > 10:
+            # print(f"Teacher {teacher} has been assigned to more than 10 events.")
+            cost = cost + 1
+        if count < 5:
+            # print(f"Teacher {teacher} has been assigned to less than 5 events.")
+            cost = cost + 1
+    # print ("_______________________")
+    # print ("cost of teacher load:", cost)
+    # print(cost)
     return cost
+    

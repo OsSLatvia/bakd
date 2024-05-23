@@ -15,6 +15,8 @@ class Teacher:
         return False
     def to_dict(self):
         return {"id": self.teacher}
+    def __hash__(self):
+        return hash(self.teacher)
     # getters 
     def get_teacher(self):
         return self.teacher
