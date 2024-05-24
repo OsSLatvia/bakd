@@ -23,6 +23,7 @@ def repair_gene(chromosome, gene):
             return True
         else:
             attempts += 1
+    # print("cant repairing")
     return False
 def find_random_valid_timeslot(gene, chromosome):
     timeslot_Indexes = random.sample(range(0, len(all_timeslots)), len(all_timeslots))

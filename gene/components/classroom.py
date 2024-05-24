@@ -13,6 +13,8 @@ class Classroom:
         return False
     def to_dict(self):
         return {"id": self.classroom, "capacity": self.size}
+    def __hash__(self):
+        return hash(self.classroom)
 
     # getters
     def get_classroom(self):

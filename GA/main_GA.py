@@ -2,14 +2,25 @@ import random
 import global_data
 import math
 import gc
+from GA.mutate import mutation_function_gene
 from GA.validate import is_valid_chromosome 
+from gene.gene import Gene
+from collections import Counter
 
-crossover_probability = global_data.crossover_probability
-mutation_probability = global_data.mutation_probability
+# crossover_probability = global_data.crossover_probability
+# mutation_probability = global_data.mutation_probability
 number_of_offsprings = global_data.number_of_offsprings
-number_of_parents = global_data.number_of_parents
+# # number_of_parents = global_data.number_of_parents
+# hillclimbing_probability = global_data.hillclimbing_probability
+def calculate_diversity(population):
+    diversity = 0
+    num_genes = len(population[0])
+    for i in range(num_genes):
+        gene_variants = Counter(ind[i] for ind in population)
+        diversity += len(gene_variants)
+    return diversity / num_genes
 
-def genetic_algorithm(population_size, generations, fitness_function, crossover_function, mutation_function, initialization_function):
+def genetic_algorithm(print_msg, hillclimbing_probability, crossover_probability,  mutation_probability, population_size, generations, parent_count, selection_function, fitness_function, crossover_function, mutation_function, initialization_function):
     """
     Main Genetic Algorithm method
 
@@ -54,10 +65,12 @@ def genetic_algorithm(population_size, generations, fitness_function, crossover_
         offsprings = []
         next_generation=[]
         next_generation.append(population[best_fitness_index]) #izmanto elitism, vienmēr patur labāko indivīdu
+        next_generation.append(mutation_function(copy_chromosome(population[best_fitness_index])))
+        # next_generation.append(apply_hillclimbing(copy_chromosome(population[best_fitness_index])))
         random_number = random.random()
         
         while len(next_generation)<population_size:
-            parents = roulet_select_parents(population, fitness_values, number_of_parents)
+            parents = selection_function(population, fitness_values, parent_count)
             if random_number < crossover_probability:
                 offsprings = crossover_function(parents, number_of_offsprings)
             else:
@@ -68,9 +81,9 @@ def genetic_algorithm(population_size, generations, fitness_function, crossover_
                 # print(is_valid_chromosome(individual))
                 
                 if random.random() < mutation_probability:  
-                    # print("befoe mutation: ", fitness_function(individual))
-                    individual = mutation_function(individual)
-                    # print("after mutation: ", fitness_function(individual))
+                    individual = mutation_function(copy_chromosome(individual))
+                if random.random() < hillclimbing_probability: 
+                    individual = apply_hillclimbing(copy_chromosome(individual))
                 if len(next_generation)<population_size:
                     next_generation.append(individual)
                 else:
@@ -96,47 +109,30 @@ def genetic_algorithm(population_size, generations, fitness_function, crossover_
         # print ("best individual: ", best_individual)
         avarage_fitness=sum(fitness_values)/len(fitness_values)
         
-        print ("generation: ", generation, "best fitness: ", round(best_fitness,6), "avarage fitness: ", round(avarage_fitness, 6), "best_cost: ", best_cost)
+        print (print_msg, " generation: ", generation, "best fitness: ", round(best_fitness,6), "avarage fitness: ", round(avarage_fitness, 6), "best_cost: ", best_cost)
         # print ("avarage fitness: ", avarage_fitness)
         # print ("best_cost: ", best_cost)
+        diversity = calculate_diversity(population)
+        print(f"Generation {generation}: Diversity {diversity}")
         if math.isclose(avarage_fitness, best_fitness, rel_tol=1e-6):
             break
         
 
     # Run the algorithm for the specified number of generations
     return best_individual, best_fitness
+def copy_chromosome(chromosome):
+    chromosome_copy=[]
+    for gene in chromosome:
+        gene_copy = Gene(gene.event)
+        gene_copy.set_classroom(gene.classroom)
+        gene_copy.set_teacher(gene.teacher)
+        gene_copy.set_timeslot(gene.timeslot)
+        chromosome_copy.append(gene_copy)
+    return chromosome_copy
+def apply_hillclimbing(chromosome):
+    for gene in chromosome:
+        mutation_function_gene(chromosome, gene)
+    # print("hillclimb")
+    return chromosome
 
-
-def tournament_select_parents(population, fitness_values, number_of_parents):
-    parents = []
-    for _ in range(number_of_parents):
-        tournament = random.sample(population, k=5)  # Select a random subset of 5 individuals
-        max_fitness = max(fitness_values[i] for i in range(len(tournament)))
-        parents.append(tournament[fitness_values.index(max_fitness)])
-    return parents
-
-def roulet_select_parents(population, fitness_values, number_of_parents):
-    # Calculate the total fitness
-    total_fitness = sum(fitness_values)
-    
-    # Calculate the relative fitness (probability) of each individual
-    relative_fitness = [f / total_fitness for f in fitness_values]
-    
-    # Cumulative probability distribution
-    cumulative_probabilities = []
-    cumulative_sum = 0
-    for rf in relative_fitness:
-        cumulative_sum += rf
-        cumulative_probabilities.append(cumulative_sum)
-    
-    # Select parents
-    parents = []
-    for _ in range(number_of_parents):
-        r = random.random()
-        for i, individual in enumerate(population):
-            if r <= cumulative_probabilities[i]:
-                parents.append(individual)
-                break
-    
-    return parents
 

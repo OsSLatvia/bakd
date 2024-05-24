@@ -18,12 +18,12 @@ def fitness_function(chromosome):
     return fitness_value, costs
 
 def costOfSoftConstraints(chromosome):
-    weights=[0.3, 0.6, 0.5]
+    weights=[0.2, 0.7, 0.7, 0.1]
     free_day_cost = checkForFreeDay(chromosome) * weights[0]
     teacher_load_cost = checkTeacherLoad(chromosome) * weights[1]
     room_size_cost = checkRoomSpace(chromosome) * weights[2]
-    # constraint4_cost = constraints.checkConstraint4(chromosome) * weights[3]
-    cost = [free_day_cost, teacher_load_cost, room_size_cost]
+    free_period_cost = checkForFreePeriodsInDay(chromosome) * weights[3]
+    cost = [free_day_cost, teacher_load_cost, room_size_cost, free_period_cost]
     rounded_cost = [round(c, 2) for c in cost]
     return rounded_cost 
 def checkForFreeDay(chromosome):
@@ -67,4 +67,28 @@ def checkRoomSpace(chromosome):
         elif students_in_event > 0.9 * maximum_room_capacity:
             over_capacity_percentage = (students_in_event - 0.9 * maximum_room_capacity) / (0.1 * maximum_room_capacity)
             cost += over_capacity_percentage
+    return cost
+def checkForFreePeriodsInDay(chromosome):
+    cost = 0
+    for student_group in student_group_list:
+        unique_days = set()
+        for event in student_group.get_events():
+            gene = chromosome[event.get_event_ID()]
+            timeslot = gene.get_timeslot()
+            unique_days.add(timeslot.get_day())
+        
+        for day in unique_days:
+            events_on_day = [event for event in student_group.get_events() if chromosome[event.get_event_ID()].get_timeslot().get_day() == day]
+            events_on_day.sort(key=lambda event: chromosome[event.get_event_ID()].get_timeslot().get_timeslot())  # Sort events by timeslot
+            
+            prev_event_end = 0
+            for event in events_on_day:
+                timeslot = chromosome[event.get_event_ID()].get_timeslot()
+                event_start = timeslot.get_timeslot()
+                
+                # Check if there's a gap between the previous event end and the current event start
+                if event_start - prev_event_end > 1:
+                    cost += 1  # Increase cost if there's a gap
+                prev_event_end = event_start + 1  # Update previous event end
+                
     return cost

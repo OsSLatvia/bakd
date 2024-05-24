@@ -19,6 +19,16 @@ class Gene:
         copied_gene.classroom = copy.deepcopy(self.classroom, memo)
         copied_gene.teacher = copy.deepcopy(self.teacher, memo)
         return copied_gene
+    def __eq__(self, other):
+        if isinstance(other, Gene):
+            return (self.event == other.event and
+                    self.timeslot == other.timeslot and
+                    self.classroom == other.classroom and
+                    self.teacher == other.teacher)
+        return False
+    def __hash__(self):
+        return hash((self.event, self.timeslot, self.classroom, self.teacher))
+
     # getters
     def get_event(self):
         return self.event

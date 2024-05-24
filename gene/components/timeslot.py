@@ -12,6 +12,8 @@ class Timeslot:
         if isinstance(other, Timeslot):
             return self.timeslot == other.timeslot
         return False
+    def __hash__(self):
+        return hash(self.timeslot)
     # getters
     def get_timeslot(self):
         return self.timeslot
