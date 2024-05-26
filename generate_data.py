@@ -1,6 +1,6 @@
 from gene.student_group import StudentGroup
 from gene.event import Event
-from gene.gene import Gene
+# from gene.gene import Gene
 from gene.components.classroom import Classroom
 from gene.components.teacher import Teacher
 from gene.components.timeslot import Timeslot
@@ -30,9 +30,9 @@ def read_data_from_file(file_name):
 def generate_teachers(number_of_teachers):
     return [Teacher(f"ID{i}") for i in range(1, number_of_teachers + 1)]
 def generate_classrooms(number_of_classrooms):
-    return [Classroom(i, random.randint(20, 200)) for i in range(number_of_classrooms)]
+    return [Classroom(i, random.choice([40, 120, 3 ,150, 200])) for i in range(number_of_classrooms)]
 def generate_student_groups(number_of_groups):
-    return [StudentGroup(i, random.randint(15, 30)) for i in range(number_of_groups)]
+    return [StudentGroup(i, random.randint(20, 30)) for i in range(number_of_groups)]
 
 def generate_events(number_of_events, student_groups):
     events = []

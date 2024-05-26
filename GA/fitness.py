@@ -8,9 +8,6 @@ all_timeslots = global_data.all_timeslots
 student_group_list = global_data.student_groups
 
 def fitness_function(chromosome):
-    # # Define your fitness calculation logic here
-    # score = sum([1 for gene in solution if is_valid(gene)])
-    # return score
     costs = costOfSoftConstraints(chromosome)
     cost_sum = sum(costs)
     fitness_value=1/(1+cost_sum)
@@ -18,12 +15,13 @@ def fitness_function(chromosome):
     return fitness_value, costs
 
 def costOfSoftConstraints(chromosome):
-    weights=[0.2, 0.7, 0.7, 0.1]
-    free_day_cost = checkForFreeDay(chromosome) * weights[0]
-    teacher_load_cost = checkTeacherLoad(chromosome) * weights[1]
-    room_size_cost = checkRoomSpace(chromosome) * weights[2]
-    free_period_cost = checkForFreePeriodsInDay(chromosome) * weights[3]
-    cost = [free_day_cost, teacher_load_cost, room_size_cost, free_period_cost]
+    weights=[0.2, 0.7, 0.7, 0.2, 0.4]
+    cost=[]
+    cost.append(checkForFreeDay(chromosome) * weights[0])
+    cost.append(checkTeacherLoad(chromosome) * weights[1])
+    cost.append(checkRoomSpace(chromosome) * weights[2])
+    cost.append(checkForFreePeriodsInDay(chromosome) * weights[3])
+    cost.append(checkForEventsInDay(chromosome) * weights[4])
     rounded_cost = [round(c, 2) for c in cost]
     return rounded_cost 
 def checkForFreeDay(chromosome):
@@ -57,10 +55,7 @@ def checkTeacherLoad(chromsome):
 def checkRoomSpace(chromosome):
     cost = 0
     for gene in chromosome:
-        students_in_event = 0
-        for student_group in gene.event.get_student_groups():
-            students_in_event += student_group.get_size()
-        
+        students_in_event = gene.students_in_event
         maximum_room_capacity = gene.get_classroom().get_size()
         if students_in_event > maximum_room_capacity:
             cost += 1
@@ -91,4 +86,30 @@ def checkForFreePeriodsInDay(chromosome):
                     cost += 1  # Increase cost if there's a gap
                 prev_event_end = event_start + 1  # Update previous event end
                 
+    return cost
+
+def checkForEventsInDay(chromosome):
+    cost = 0
+    for student_group in student_group_list:
+        unique_days = set()
+        for event in student_group.get_events():
+            gene = chromosome[event.get_event_ID()]
+            timeslot = gene.get_timeslot()
+            unique_days.add(timeslot.get_day())
+        
+        for day in unique_days:
+            events_on_day = [event for event in student_group.get_events() if chromosome[event.get_event_ID()].get_timeslot().get_day() == day]
+            
+            # Count the number of events on the day
+            num_events_on_day = len(events_on_day)
+            
+            # Increase cost if there are more than 4 events in one day
+            if num_events_on_day > 5:
+                cost += 1
+            else:
+                if num_events_on_day > 4:
+                    cost += 0.5     
+                else:
+                    if num_events_on_day > 3:
+                        cost += 0.2              
     return cost

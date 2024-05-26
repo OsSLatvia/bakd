@@ -17,7 +17,7 @@ class Event:
             return self.event_ID == other.event_ID
         return False
     def to_dict(self):
-        return {"id": self.event_ID, "student_group_list": [group.group_ID for group in self.student_groups]}
+        return {"id": self.event_ID, "student_group_list": [group.to_dict() for group in self.student_groups]}
     
     def __hash__(self):
         return hash(self.event_ID)

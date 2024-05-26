@@ -1,10 +1,13 @@
 import copy
 class Gene:
-    def __init__(self, Event):
+    def __init__(self, Event, timeslot=None, classroom=None, teacher=None):
         self.event = Event
-        self.timeslot = None
-        self.classroom = None
-        self.teacher = None
+        self.timeslot = timeslot
+        self.classroom = classroom
+        self.teacher = teacher
+        self.students_in_event = 0
+        for student_group in Event.student_groups:
+            self.students_in_event = self.students_in_event + student_group.size
 
     def __str__(self):
         return f"event={self.event}, timeslot={self.timeslot}, classroom={self.classroom}, teacher={self.teacher})"
@@ -28,7 +31,27 @@ class Gene:
         return False
     def __hash__(self):
         return hash((self.event, self.timeslot, self.classroom, self.teacher))
+    def to_dict(self):
+        return {
+            'event': self.event.to_dict(),
+            'timeslot': self.timeslot.to_dict(),
+            'classroom': self.classroom.to_dict(),
+            'teacher': self.teacher.to_dict(),
+            'students_in_event': self.students_in_event
+        }
+    # @classmethod
+    # def from_dict(cls, data):
+    #     event = Event.from_dict(data['event'])
+    #     timeslot = Timeslot.from_dict(data['timeslot'])
+    #     classroom = Classroom.from_dict(data['classroom'])
+    #     teacher = Teacher.from_dict(data['teacher'])
+    #     students_in_event = data['students_in_event']
 
+    #     # Now create a new Gene instance with the reconstructed objects
+    #     gene = cls(event=event, timeslot=timeslot, classroom=classroom, teacher=teacher)
+    #     gene.students_in_event = students_in_event
+
+    #     return gene
     # getters
     def get_event(self):
         return self.event

@@ -14,6 +14,13 @@ class Timeslot:
         return False
     def __hash__(self):
         return hash(self.timeslot)
+    def to_dict(self):
+        return {
+            'timeslot': self.timeslot,
+            'timeslots_per_day': self.timeslots_per_day,
+        }
+    def from_dict(cls, data):
+        return cls(data['timeslot'], data['timeslots_per_day'])
     # getters
     def get_timeslot(self):
         return self.timeslot
