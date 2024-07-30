@@ -1,4 +1,4 @@
-# Bakalaura darba "Laika grafiku izveides un optimizācijas algoritmu izpēte" praktiskā daļa, ģenētiskais algoritms laika grafiku automatizētai veidošanai
+# Bakalaura darba "Laika grafiku izveides un optimizācijas algoritmu izpēte" praktiskā daļa - ģenētiskais algoritms laika grafiku automatizētai veidošanai
 Palaižot main.py programma uzsāk darbību, kur ielasa datus no data.txt faila un izpilda ģenētisko algoritmu šiem datiem.
 main.py nav izveidots UI, lai mainītu ģenētiskā algoritma parametrus, to vajag darīt caur main.py failā saglabātajām vērtībām un ieteicams izmantot PyPy tā palaišanai, kas ļoti paātrina tā darbīu
 
